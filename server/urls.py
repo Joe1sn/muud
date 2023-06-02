@@ -17,4 +17,5 @@ urlpatterns = {
     "/html_test": server_api.html_test,
     "/json_test": server_api.test,
     "/404": server_api.page_404,
+    "/file_test": server_api.file_test,
 }

@@ -47,10 +47,32 @@ status_code_dict = {
     500:"Internal Server Error",
     503:"Service Unavailable",
 }
+'''
+video/mp4：MP4视频
+video/mpeg：MPEG视频
+application/octet-stream：二进制数据流
+'''
 
 content_types = {
-    "html":"text/html",
-    "json":"application/json"
+    "text": "text/plain",
+    "html": "text/html",    #HTML文档
+    "css" : "text/css",     #CSS样式表
+    "js" : "text/javascript",   #JavaScript脚本
+
+    "json": "application/json",
+    "pdf": "application/pdf",
+    "xml": "application/xml",
+    "bin": "application/octet-stream",  #[特质]
+
+    "jpeg": "image/jpeg",   #JPEG图像
+    "png": "image/png",     #PNG图像
+    "gif": "image/gif",     #GIF图像
+
+    "mpeg": "audio/mpeg",   #MPEG音频
+    "wav": "audio/wav",     #WAV音频
+
+    "mp4" : "video/mp4",    #MP4视频
+    "mpeg" : "video/mpeg",  #MPEG视频
 }
 
 class Response():
@@ -63,7 +85,7 @@ class Response():
         else:   self.reply = reply
         self.length = len(self.reply)
 
-    def consum(self) -> str:
+    def consum(self) -> bytes:
         result = ""
         result += "HTTP/1.1 {status_code} {msg}\r\n".format(
             status_code=self.status_code,   msg=status_code_dict[self.status_code])
@@ -72,7 +94,11 @@ class Response():
         result += "Content-Length: {length}\r\n".format(
             length=self.length)
         result += "\r\n"
-        result += self.reply
+
+        result = result.encode()
+        if type(self.reply) == bytes:
+            result += self.reply
+        else:   result += self.reply.encode()
         return result
     
 
