@@ -73,6 +73,9 @@ content_types = {
 
     "mp4" : "video/mp4",    #MP4视频
     "mpeg" : "video/mpeg",  #MPEG视频
+
+    "post_file": "multipart/form-data;"  #文件上传
+
 }
 
 class Response():

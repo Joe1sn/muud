@@ -1,32 +1,35 @@
 import re
 # 验证 HTTP 请求报文
-r_request = re.compile(r'^([A-Z]+)\s+([\w/\.]+)\s+HTTP/(\d+\.\d+)\r\n'
-                           r'((?:[\w-]+:.*\r\n)*)(?:\r\n)?'
-                           r'([\s\S]*)$')
+r_request = re.compile(rb'^([A-Z]+)\s+([\w/\.]+)\s+HTTP/(\d+\.\d+)\r\n'
+                           rb'((?:[\w-]+:.*\r\n)*)(?:\r\n)?'
+                           rb'([\s\S]*)$')
 
 # 验证 HTTP 响应报文
-r_response = re.compile(r'^HTTP/(\d+\.\d+)\s+(\d+)\s+([\w\s]+)\r\n'
-                            r'((?:[\w-]+:.*\r\n)*)(?:\r\n)?'
-                            r'([\s\S]*)$')
+r_response = re.compile(rb'^HTTP/(\d+\.\d+)\s+(\d+)\s+([\w\s]+)\r\n'
+                            rb'((?:[\w-]+:.*\r\n)*)(?:\r\n)?'
+                            rb'([\s\S]*)$')
 
 # 得到 HTTP 报文中的method
-r_method = re.compile(r'([A-Z]+) /')
+r_method = re.compile(rb'([A-Z]+) /')
 
 # 得到 HTTP 报文中的路径
-r_path = re.compile(r'[A-Z]+\s(/[^?\s]*)')
+r_path = re.compile(rb'[A-Z]+\s(/[^?\s]*)')
 
 # 得到 HTTP 报文中的GET参数
 r_get_query = re.compile(r'\?(.*) HTTP')
 
 
 # 得到 HTTP 报文中的content_length
-r_content_length = re.compile(r'Content-Length: (\d+)')
+r_content_length = re.compile(rb'Content-Length: (\d+)')
 
 # 得到 HTTP 报文中的content_type
-r_content_type = re.compile(r"Content-Type: ([^;]+)")
+r_content_type = re.compile(rb"Content-Type: ([^;]+)")
 
 # 得到 HTTP 报文中的session_od
-r_session_id = re.compile(r'session_id=([^;]+)')
+r_session_id = re.compile(rb'session_id=([^;]+)')
+
+# 得到 HTTP 报文中的文件上传时的boundary值
+r_boundary = re.compile(rb"boundary=([^;\r\n$]+)")
 
 
 '''

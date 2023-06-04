@@ -13,6 +13,7 @@ from server.models import *
 from server.db import session
 from server.utils.epollcontrol import *
 from server.utils.http_response import *
+# from server.routers.http_router import HTTPRequest as request
 
 '''API装饰器部分
 '''
@@ -47,33 +48,33 @@ def refresh_db():
 socket_auth: 使用socket的认证机制
 
 '''
-@socket_api
-def socket_auth(request):
-    username = request.package["data"]["user"]
-    password = request.package["data"]["passwd"]
+# @socket_api
+# def socket_auth(request):
+#     username = request.package["data"]["user"]
+#     password = request.package["data"]["passwd"]
     
-    refresh_db()
-    ret = session.query(User).filter(User.username == username, User.password == password).first()
+#     refresh_db()
+#     ret = session.query(User).filter(User.username == username, User.password == password).first()
 
-    if ret == None:
-        request.send(b"Failed")
-        name = request.getpeername()
-        close_connetion(request.connections, request.fileno, request.epoll)
-        info('Authentication Error', name)
-        return False
-    else:
-        ret = session.query(User).filter(User.id == ret.id).\
-            update({User.online:True})
-        # ret.update({User.online:True})    #报错确认
-        session.commit()           #确认更改
-        request.send(b"True")
-        return True
+#     if ret == None:
+#         request.send(b"Failed")
+#         name = request.getpeername()
+#         close_connetion(request.connections, request.fileno, request.epoll)
+#         info('Authentication Error', name)
+#         return False
+#     else:
+#         ret = session.query(User).filter(User.id == ret.id).\
+#             update({User.online:True})
+#         # ret.update({User.online:True})    #报错确认
+#         session.commit()           #确认更改
+#         request.send(b"True")
+#         return True
     
     
-@socket_api
-def sendall_msg(request):
-    # {dest="joe1sn", to="joe1sn@example.com",type="auth", data={"user": "joe1sn","passwd": "xxxx"}}
-    msg = request.package["data"]["msg"]
+# @socket_api
+# def sendall_msg(request):
+#     # {dest="joe1sn", to="joe1sn@example.com",type="auth", data={"user": "joe1sn","passwd": "xxxx"}}
+#     msg = request.package["data"]["msg"]
 
 
 #======================================================================================
@@ -100,19 +101,19 @@ def test(http_request):
             "message":"Test Fine"})
     # data = json.dumps(json_data, ensure_ascii=False).encode('unicode_escape').decode()
     result = Response(reply=data)
-    return result.consum().encode()
+    return result.consum()
 
 @http_api
 def html_test(http_request):
     data = "<html><body><h1>Hello, world!</h1></body></html>"
     result = Response(reply=data,type="html")
-    return result.consum().encode()
+    return result.consum()
 
 @http_api
 def page_404(http_request):
     data = "<html><body><h1>404, Page Not Found</h1></body></html>"
     result = Response(reply=data,type="html",status_code=404)
-    return result.consum().encode()
+    return result.consum()
 
 @http_api
 def file_test(http_request):
@@ -120,4 +121,44 @@ def file_test(http_request):
     with open(r"/mnt/d/Github/muud/test/test.pdf","rb") as f:
         result = f.read()
     result = Response(reply=result,type="pdf")
+    return result.consum()
+
+@http_api
+def post_test(http_request):
+    result = ""
+    for key in http_request.data.keys():
+        result += str(key) + " : " + http_request.data[key] + "\n"
+
+    result += "method : " +  http_request.method        
+    result = Response(reply=result,type="text")
+    return result.consum()
+
+@http_api
+def get_test(http_request):
+    result = ""
+    for key in http_request.data.keys():
+        result += str(key) + " : " + http_request.data[key] + "\n"
+    result += "method : " +  http_request.method
+    result = Response(reply=result,type="text")
+    return result.consum()
+
+@http_api
+def file_upload(http_request):
+    result=""
+    with open(r"/mnt/d/Github/muud/test/file_upload.html","rb") as f:
+        result = f.read()
+    result = Response(reply=result,type="html")
+    return result.consum()
+
+@http_api
+def upload(http_request):
+    result=""
+    info("FILE Content>>>>>>>>>")
+    # info(http_request.data["len"]/1024,"KB")
+    name = http_request.data["filename"]
+    # print(http_request.data["file"][:0x20])
+    with open(r"/mnt/d/Github/muud/test/"+name,"wb") as f:
+        result = f.write(http_request.data["file"])
+    data = "<html><body><h1>okok</h1></body></html>"
+    result = Response(reply=data,type="html",status_code=200)
     return result.consum()

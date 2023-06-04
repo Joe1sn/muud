@@ -85,10 +85,11 @@ class Server():
         # 创建epoll对象并注册服务器套接字
         epoll = select.epoll()
         epoll.register(server.fileno(), select.EPOLLIN)
-        info("Listening on {}:{}...".format(self.server_ip, self.server_port))
+        info("web start on http://{}:{}".format(self.server_ip, self.server_port))
         connections = {}
         requests = {}
         responses = {}
+        keep_trans = False
         try:
             while True:
                 events = epoll.poll(1)
@@ -119,9 +120,11 @@ class Server():
                     elif event & select.EPOLLIN:
                         # 有数据可读
                         try:
-                            data = connections[fileno].recv(4096)
+                            data = b""
+                            data = connections[fileno].recv(1024*1024*10)
+                            # print("data from server\n",data)
                             if data:
-                                requests[fileno] = data
+                                requests[fileno] += data
                                 # info(data)
                                 # data = json.loads(data)
                                 # info(connections)
@@ -168,22 +171,28 @@ class Server():
                     if b"HTTP" in data or b"http" in data:
                         # 解析请求头部
                         http = HTTPRequest(data=data, fileno=fileno, connections=connections)
-                        http.show()
-                        http_route = HTTPRouter(http)
-                        # response = b'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, world!</h1></body></html>'
-                        response = http_route.route()
-                        responses[fileno] = response
-                        connections[fileno].send(response)
-                        name = connections[fileno].getpeername()
-                        # close_connetion(connections, fileno, epoll)
-                        # info('Disconnected:', name)
+                        
+                        if http.cur_len < http.length:
+                            pass
+                        else:
+                            http.show()
+                            http_route = HTTPRouter(http)
+                            # response = b'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, world!</h1></body></html>'
+                            response = http_route.route()
+                            responses[fileno] = response
 
-                        # 构造响应头部和内容
-                        # 清空请求缓冲区
-                        response = b''
-                        data = b''
-                    data = b''
-                    requests[fileno] = b''
+                            connections[fileno].send(response)
+                            # name = connections[fileno].getpeername()
+                            # close_connetion(connections, fileno, epoll)
+                            # info('Disconnected:', name)
+
+                            # 构造响应头部和内容
+                            # 清空请求缓冲区
+                            response = b''
+                            data = b''
+                            requests[fileno] = b''
+                    # data = b''
+                    # requests[fileno] = b''
 
         except KeyboardInterrupt:
             error('KeyboardInterrupt','Exiting...')
