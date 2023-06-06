@@ -30,7 +30,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest='command')
     
     runserver_parser = subparsers.add_parser('runserver', help='start server')
-    runserver_parser.add_argument("-p", "--port", type=int, default=5222, help="port to start the server on")
+    runserver_parser.add_argument("-p", "--port", type=int, default=8000, help="port to start the server on")
     runserver_parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="ip to start the server on")
     
     migrate_parser = subparsers.add_parser('migrate', help='migrate database')

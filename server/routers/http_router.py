@@ -50,8 +50,8 @@ class HTTPRequest(object):
 
     def show(self) -> None:
         success(self.method, self.path)
-        # success("len:",self.length)
-        # success("current len:",self.cur_len)
+        success("len:",self.length)
+        success("current len:",self.cur_len)
         # info('Method:', self.method)
         # info('Path:', self.path)
         # info('query_string:', self.query_string)

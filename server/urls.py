@@ -23,4 +23,5 @@ urlpatterns = {
     "/get_test": server_api.get_test,
     "/file_upload": server_api.file_upload,
     "/upload": server_api.upload,
+    "/redirect": server_api.rd_test,
 }

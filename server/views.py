@@ -154,11 +154,13 @@ def file_upload(http_request):
 def upload(http_request):
     result=""
     info("FILE Content>>>>>>>>>")
-    # info(http_request.data["len"]/1024,"KB")
     name = http_request.data["filename"]
-    # print(http_request.data["file"][:0x20])
     with open(r"/mnt/d/Github/muud/test/"+name,"wb") as f:
         result = f.write(http_request.data["file"])
     data = "<html><body><h1>okok</h1></body></html>"
     result = Response(reply=data,type="html",status_code=200)
     return result.consum()
+
+@http_api
+def rd_test(http_request):
+    return redirect("http://joe1sn.eu.org")

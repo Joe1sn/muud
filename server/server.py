@@ -13,6 +13,7 @@ import json
 import ssl
 import socket
 import select
+import time
 
 from configparser import ConfigParser
 
@@ -89,7 +90,9 @@ class Server():
         connections = {}
         requests = {}
         responses = {}
-        keep_trans = False
+        old_time = 0
+        old_size = 0
+
         try:
             while True:
                 events = epoll.poll(1)
@@ -102,7 +105,7 @@ class Server():
                             info('Connected:', address)
 
                             #FIXME
-                            # chrome https时会引发阻塞
+                            # chrome https时会引发阻塞[因为chrome没有导入证书]
                             # connection = ssl.wrap_socket(connection, server_side=True, 
                             #         certfile=os.path.join(self.base_dir,"../","config","server.crt"),
                             #         keyfile=os.path.join(self.base_dir,"../","config","server.key"),) #升级为SSL连接
@@ -121,7 +124,7 @@ class Server():
                         # 有数据可读
                         try:
                             data = b""
-                            data = connections[fileno].recv(1024*1024*10)
+                            data = connections[fileno].recv(1024*128)
                             # print("data from server\n",data)
                             if data:
                                 requests[fileno] += data
@@ -171,11 +174,15 @@ class Server():
                     if b"HTTP" in data or b"http" in data:
                         # 解析请求头部
                         http = HTTPRequest(data=data, fileno=fileno, connections=connections)
-                        
+                        http.show()
                         if http.cur_len < http.length:
+                            speed = round(((http.cur_len-old_size)/1024/1024)/(time.time()-old_time),3)
+                            info(speed,"MB/s")
+                            old_time = time.time()
+                            old_size = http.cur_len
                             pass
                         else:
-                            http.show()
+                            # http.show()
                             http_route = HTTPRouter(http)
                             # response = b'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, world!</h1></body></html>'
                             response = http_route.route()
@@ -191,8 +198,10 @@ class Server():
                             response = b''
                             data = b''
                             requests[fileno] = b''
-                    # data = b''
-                    # requests[fileno] = b''
+                    else:
+                        response = b''
+                        data = b''
+                        requests[fileno] = b''
 
         except KeyboardInterrupt:
             error('KeyboardInterrupt','Exiting...')

@@ -90,8 +90,12 @@ class Response():
 
     def consum(self) -> bytes:
         result = ""
-        result += "HTTP/1.1 {status_code} {msg}\r\n".format(
-            status_code=self.status_code,   msg=status_code_dict[self.status_code])
+        if self.status_code == 302:
+            result += "HTTP/1.1 {status_code} {msg}\r\nLocation: {location}\r\n\r\n".format(
+                status_code=self.status_code,   msg=status_code_dict[self.status_code], location=self.reply)
+        else:
+            result += "HTTP/1.1 {status_code} {msg}\r\n".format(
+                status_code=self.status_code,   msg=status_code_dict[self.status_code])
         result += "Content-Type: {type}\r\n".format(
             type = self.content_type)
         result += "Content-Length: {length}\r\n".format(
@@ -99,9 +103,12 @@ class Response():
         result += "\r\n"
 
         result = result.encode()
-        if type(self.reply) == bytes:
-            result += self.reply
-        else:   result += self.reply.encode()
+        if self.status_code == 302:
+            pass
+        else:
+            if type(self.reply) == bytes:
+                result += self.reply
+            else:   result += self.reply.encode()
         return result
     
 
@@ -113,3 +120,9 @@ class Response():
 # response += "Content-Length: {length}\r\n"
 # response += "\r\n"
 # response += "{json_data}"
+
+# 重定向
+def redirect(http_url):
+    data= str(http_url)
+    result = Response(reply=data,type="text",status_code=302)
+    return result.consum()
